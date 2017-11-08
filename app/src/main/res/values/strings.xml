@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ExportToFirebase</string>
+    <string name="facebook_app_id">257324698126869</string>
+    <string name="fb_login_protocol_scheme">fb257324698126869</string>
+</resources>
