@@ -5,10 +5,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -16,9 +20,12 @@ import com.facebook.login.widget.LoginButton;
 import java.util.Arrays;
 
 public class ActivitySignUp extends AppCompatActivity {
-    TextView        txtStatus      ;
-    LoginButton     loginButton    ;
-    CallbackManager callbackManager;
+    private TextView           txtStatus         ;
+    private LoginButton        loginButton       ;
+    private CallbackManager    callbackManager   ;
+    private AccessTokenTracker accessTokenTracker;
+    private ProfileTracker     profileTracker    ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState)                ;
@@ -31,9 +38,24 @@ public class ActivitySignUp extends AppCompatActivity {
 
     public void initializeControllers()
     {
-        callbackManager = CallbackManager.Factory.create();
-        txtStatus       = (TextView) findViewById(R.id.txtStatus);
-        loginButton     = (LoginButton)findViewById(R.id.loginButton);
+        callbackManager    = CallbackManager.Factory.create();
+        txtStatus          = (TextView) findViewById(R.id.txtStatus);
+        loginButton        = (LoginButton)findViewById(R.id.loginButton);
+        accessTokenTracker = new AccessTokenTracker()
+        {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken currentToken) {
+
+            }
+        };
+        profileTracker     = new ProfileTracker()
+        {
+            @Override
+            protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+
+            }
+        };
+
 
     }
 
