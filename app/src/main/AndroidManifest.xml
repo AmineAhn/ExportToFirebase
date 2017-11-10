@@ -39,7 +39,14 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityUserProfile"></activity>
+        <provider
+            android:authorities="com.facebook.FacebookContentProvider"
+            android:name="com.facebook.FacebookContentProvider"
+            android:exported="true"/>
+
+        <activity android:name=".ActivityUserProfile"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

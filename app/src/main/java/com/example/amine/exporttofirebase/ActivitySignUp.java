@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -20,26 +21,51 @@ import com.facebook.login.widget.LoginButton;
 import java.util.Arrays;
 
 public class ActivitySignUp extends AppCompatActivity {
-    private TextView           txtStatus         ;
-    private LoginButton        loginButton       ;
-    private CallbackManager    callbackManager   ;
-    private AccessTokenTracker accessTokenTracker;
-    private ProfileTracker     profileTracker    ;
+    private TextView           txtStatus                  ;
+    private LoginButton        loginButton                ;
+    private CallbackManager    callbackManager            ;
+    private AccessTokenTracker accessTokenTracker         ;
+    private ProfileTracker     profileTracker             ;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState)                ;
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_sign_up)         ;
         initializeControllers()                           ;
-        FacebookLoginAction()                                   ;
+        startTracking()                                   ;
+        FacebookLoginAction()                             ;
 
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        Profile profile = Profile.getCurrentProfile();
+        nextActivity(profile);
+    }
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+    }
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        stopTracking();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
     public void initializeControllers()
     {
-        callbackManager    = CallbackManager.Factory.create();
-        txtStatus          = (TextView) findViewById(R.id.txtStatus);
+        callbackManager    = CallbackManager.Factory.create()           ;
+        //txtStatus          = (TextView) findViewById(R.id.txtStatus)    ;
         loginButton        = (LoginButton)findViewById(R.id.loginButton);
         accessTokenTracker = new AccessTokenTracker()
         {
@@ -51,41 +77,64 @@ public class ActivitySignUp extends AppCompatActivity {
         profileTracker     = new ProfileTracker()
         {
             @Override
-            protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-
+            protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile)
+            {
+                nextActivity(newProfile);
             }
         };
-
 
     }
 
     private void FacebookLoginAction()
     {
-        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        FacebookCallback<LoginResult> facebookCallback = new FacebookCallback<LoginResult>()
+        {
             @Override
             public void onSuccess(LoginResult loginResult)
             {
-                txtStatus.setText("LOGIN SUCCESFUL: " + loginResult.getAccessToken());
+                Profile profile = Profile.getCurrentProfile();
+                Toast.makeText(getApplicationContext(), "Loggin in ... ", Toast.LENGTH_SHORT).show();
+                //txtStatus.setText("LOGIN SUCCESFUL: " + loginResult.getAccessToken());
+                nextActivity(profile);
             }
 
             @Override
             public void onCancel()
             {
-                txtStatus.setText("LOGIN CANCELLED");
+                //txtStatus.setText("LOGIN CANCELLED");
             }
 
             @Override
             public void onError(FacebookException error)
             {
-                txtStatus.setText("LOGIN ERROR: " + error.getMessage());
+                //txtStatus.setText("LOGIN ERROR: " + error.getMessage());
             }
-        });
-        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile"));
+        };
+        LoginManager.getInstance().registerCallback(callbackManager, facebookCallback) ;
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("user_photos"));
+        loginButton.registerCallback(callbackManager, facebookCallback );
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+
+    private void startTracking()
+    {
+        accessTokenTracker.startTracking();
+        profileTracker.startTracking()    ;
+    }
+    private void stopTracking()
+    {
+        accessTokenTracker.startTracking();
+        profileTracker.startTracking()    ;
+    }
+
+    private void nextActivity(Profile profile)
+    {
+        if(profile != null)
+        {
+            Intent main = new Intent(ActivitySignUp.this, ActivityUserProfile.class);
+            main.putExtra("name", profile.getFirstName());
+            main.putExtra("surname", profile.getLastName());
+            main.putExtra("imageUrl", profile.getProfilePictureUri(200,200));
+        }
     }
 }
